@@ -2,17 +2,6 @@
 FastAPI Server - Clinical Diagnostic Copilot
 ============================================
 Main application entry point.
-
-Endpoints:
-- POST /analyze - Upload image and run diagnostic workflow
-- GET /health - Health check
-- GET / - Serve frontend
-
-Production considerations implemented:
-- CORS for cross-origin requests
-- File upload validation
-- Error handling and logging
-- Async request processing
 """
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -21,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, List
+from contextlib import asynccontextmanager
 import os
 import sys
 from pathlib import Path
@@ -33,6 +23,34 @@ from agents.graph import diagnostic_graph
 from agents.state import AgentState
 
 # ============================================================================
+# LIFESPAN EVENT HANDLER
+# ============================================================================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for startup and shutdown events.
+    Modern FastAPI way to handle application lifecycle.
+    """
+    # Startup
+    print("\n" + "="*60)
+    print("🏥 Clinical Diagnostic Copilot Server Starting...")
+    print("="*60)
+    print("✓ FastAPI initialized")
+    print("✓ CORS middleware configured")
+    print("✓ Agent workflow ready")
+    print("✓ Vision module loaded")
+    print("✓ Knowledge base initialized")
+    print("\n🌐 Server ready at http://localhost:8000")
+    print("📚 API docs at http://localhost:8000/api/docs")
+    print("="*60 + "\n")
+    
+    yield  # Server runs here
+    
+    # Shutdown
+    print("\n👋 Server shutting down gracefully...")
+
+# ============================================================================
 # APP INITIALIZATION
 # ============================================================================
 
@@ -40,33 +58,29 @@ app = FastAPI(
     title="Clinical Diagnostic Copilot",
     description="AI-powered multimodal medical image analysis system",
     version="1.0.0",
-    docs_url="/api/docs",  # Swagger UI at /api/docs
-    redoc_url="/api/redoc"  # ReDoc at /api/redoc
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    lifespan=lifespan
 )
 
 # ============================================================================
 # MIDDLEWARE CONFIGURATION
 # ============================================================================
 
-# CORS - Allow requests from frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ============================================================================
-# PYDANTIC MODELS (Request/Response Schemas)
+# PYDANTIC MODELS
 # ============================================================================
 
 class AnalysisResponse(BaseModel):
-    """
-    Structured response for image analysis.
-    
-    Pydantic automatically validates and documents this schema.
-    """
+    """Structured response for image analysis."""
     success: bool = Field(..., description="Whether analysis completed successfully")
     primary_diagnosis: Optional[str] = Field(None, description="Main diagnostic finding")
     confidence: Optional[float] = Field(None, description="Confidence score (0-1)")
@@ -76,9 +90,9 @@ class AnalysisResponse(BaseModel):
     requires_review: Optional[bool] = Field(None, description="Flags low-confidence cases")
     error: Optional[str] = Field(None, description="Error message if failed")
     
-    class Config:
-        json_schema_extra = {
-            "example": {
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
                 "success": True,
                 "primary_diagnosis": "Diabetic Retinopathy",
                 "confidence": 0.88,
@@ -87,8 +101,9 @@ class AnalysisResponse(BaseModel):
                 ],
                 "requires_review": False,
                 "final_report": "Full diagnostic report text..."
-            }
+            }]
         }
+    }
 
 
 class HealthResponse(BaseModel):
@@ -96,7 +111,6 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     agents: List[str]
-
 
 # ============================================================================
 # UTILITY FUNCTIONS
@@ -106,21 +120,7 @@ ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 def validate_image_file(file: UploadFile) -> None:
-    """
-    Validate uploaded file is a valid image.
-    
-    Checks:
-    - File extension
-    - File size
-    - Content type
-    
-    Args:
-        file: Uploaded file object
-        
-    Raises:
-        HTTPException: If validation fails
-    """
-    # Check file extension
+    """Validate uploaded file is a valid image."""
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -128,13 +128,11 @@ def validate_image_file(file: UploadFile) -> None:
             detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Check content type
     if not file.content_type.startswith('image/'):
         raise HTTPException(
             status_code=400,
             detail="File must be an image"
         )
-
 
 # ============================================================================
 # API ENDPOINTS
@@ -142,16 +140,12 @@ def validate_image_file(file: UploadFile) -> None:
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """
-    Serve the frontend HTML file.
-    
-    Returns:
-        HTML content of index.html
-    """
+    """Serve the frontend HTML file."""
     frontend_path = Path(__file__).parent.parent / "frontend" / "index.html"
     
     if frontend_path.exists():
-        return HTMLResponse(content=frontend_path.read_text(), status_code=200)
+        # Fixed: Specify UTF-8 encoding for Windows compatibility
+        return HTMLResponse(content=frontend_path.read_text(encoding='utf-8'), status_code=200)
     else:
         return HTMLResponse(
             content="<h1>Frontend not found</h1><p>Please ensure frontend/index.html exists</p>",
@@ -161,17 +155,7 @@ async def root():
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
-    """
-    Health check endpoint.
-    
-    Useful for:
-    - Monitoring/alerting systems
-    - Load balancer health checks
-    - Verifying deployment
-    
-    Returns:
-        System status information
-    """
+    """Health check endpoint."""
     return HealthResponse(
         status="healthy",
         version="1.0.0",
@@ -183,25 +167,7 @@ async def health_check():
 async def analyze_image(
     image: UploadFile = File(..., description="Medical image file (JPG, PNG, etc.)")
 ):
-    """
-    Main analysis endpoint - processes medical images through agent workflow.
-    
-    Workflow:
-    1. Validate uploaded file
-    2. Read image bytes
-    3. Initialize agent state
-    4. Run LangGraph workflow (Vision → Research → Supervisor)
-    5. Extract and return results
-    
-    Args:
-        image: Uploaded image file
-        
-    Returns:
-        AnalysisResponse with diagnostic results
-        
-    Raises:
-        HTTPException: If validation or processing fails
-    """
+    """Main analysis endpoint - processes medical images through agent workflow."""
     print(f"\n{'='*60}")
     print(f"📥 New analysis request: {image.filename}")
     print(f"{'='*60}")
@@ -270,11 +236,9 @@ async def analyze_image(
         )
         
     except HTTPException:
-        # Re-raise HTTP exceptions (already have proper status codes)
         raise
     
     except Exception as e:
-        # Catch unexpected errors
         print(f"❌ Unexpected error: {str(e)}")
         import traceback
         traceback.print_exc()
@@ -284,52 +248,16 @@ async def analyze_image(
             detail=f"Internal server error: {str(e)}"
         )
 
-
 # ============================================================================
-# STATIC FILE SERVING (CSS, JS)
+# STATIC FILE SERVING
 # ============================================================================
 
-# Mount frontend directory for static files
 frontend_dir = Path(__file__).parent.parent / "frontend"
 if frontend_dir.exists():
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
-
 # ============================================================================
-# STARTUP EVENT
-# ============================================================================
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Runs once when server starts.
-    
-    Good place for:
-    - Loading ML models
-    - Database connections
-    - Cache initialization
-    """
-    print("\n" + "="*60)
-    print("🏥 Clinical Diagnostic Copilot Server Starting...")
-    print("="*60)
-    print("✓ FastAPI initialized")
-    print("✓ CORS middleware configured")
-    print("✓ Agent workflow ready")
-    print("✓ Vision module loaded")
-    print("✓ Knowledge base initialized")
-    print("\n🌐 Server ready at http://localhost:8000")
-    print("📚 API docs at http://localhost:8000/api/docs")
-    print("="*60 + "\n")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on server shutdown."""
-    print("\n👋 Server shutting down gracefully...")
-
-
-# ============================================================================
-# DEVELOPMENT SERVER (only if run directly)
+# DEVELOPMENT SERVER
 # ============================================================================
 
 if __name__ == "__main__":
@@ -339,6 +267,6 @@ if __name__ == "__main__":
         "app:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Auto-reload on code changes
+        reload=True,
         log_level="info"
     )

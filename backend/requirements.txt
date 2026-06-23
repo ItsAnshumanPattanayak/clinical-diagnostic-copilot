@@ -23,3 +23,22 @@ pillow>=10.1.0
 numpy>=1.26.2
 python-dotenv>=1.0.0
 httpx>=0.25.2
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# AI/ML Orchestration
+langgraph==0.2.27
+langchain-core==0.3.8
+
+# Utilities
+pillow>=10.0.0
+numpy>=1.26.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.0.0
+
+# Production server
+gunicorn==21.2.0
