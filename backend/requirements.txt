@@ -1,19 +1,26 @@
 # Web Framework
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
+fastapi>=0.110.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
 
-# Core AI framework - minimal installation
+# AI/ML Orchestration
 langgraph==0.2.27
+langchain==0.3.1
+langchain-openai==0.2.1
 langchain-core==0.3.8
+langchain-text-splitters==0.3.0
 
-# Data & Image Processing
-pillow==10.1.0
-numpy==1.26.4
-pydantic==2.5.3
-python-dotenv==1.0.0
+# Data Validation
+pydantic>=2.7.4,<3.0.0
+pydantic-settings>=2.2.0
 
-# Additional required dependencies
-typing-extensions==4.8.0
-httpx==0.25.2
-anyio==3.7.1
+# Deep Learning (CPU ONLY to prevent Render crashes)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0+cpu
+torchvision==0.17.0+cpu
+
+# Utilities
+pillow>=10.1.0
+numpy>=1.26.2
+python-dotenv>=1.0.0
+httpx>=0.25.2
