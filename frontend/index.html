@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Diagnostic Copilot</title>
+    
+    <!-- Link to external stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- Preconnect to potential CDN sources for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <!-- Favicon (optional - create a simple medical icon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <span class="icon">🏥</span>
+                    Clinical Diagnostic Copilot
+                </h1>
+                <p class="subtitle">
+                    AI-Powered Multimodal Medical Image Analysis
+                </p>
+            </div>
+            
+            <!-- Status Indicator -->
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">System Ready</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-card">
+                    <div class="upload-icon">📁</div>
+                    <h2>Upload Medical Image</h2>
+                    <p class="upload-description">
+                        Supported formats: JPG, PNG, BMP, TIFF (Max 10MB)
+                    </p>
+                    
+                    <!-- File Input (hidden) -->
+                    <input 
+                        type="file" 
+                        id="imageInput" 
+                        accept="image/*"
+                        style="display: none;"
+                    >
+                    
+                    <!-- Upload Button -->
+                    <button class="btn btn-primary" id="uploadBtn">
+                        Select Image
+                    </button>
+                    
+                    <!-- Or use drag & drop -->
+                    <div class="drop-zone" id="dropZone">
+                        <p>Or drag and drop an image here</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Preview Section (hidden initially) -->
+            <section class="preview-section hidden" id="previewSection">
+                <div class="preview-card">
+                    <h3>Image Preview</h3>
+                    <div class="image-container">
+                        <img id="imagePreview" alt="Uploaded medical image">
+                    </div>
+                    <div class="preview-info">
+                        <p><strong>Filename:</strong> <span id="fileName"></span></p>
+                        <p><strong>Size:</strong> <span id="fileSize"></span></p>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-success" id="analyzeBtn">
+                            🔬 Analyze Image
+                        </button>
+                        <button class="btn btn-secondary" id="cancelBtn">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Indicator (hidden initially) -->
+            <section class="loading-section hidden" id="loadingSection">
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <h3>Processing Image...</h3>
+                    <p id="loadingMessage">Initializing agent workflow...</p>
+                    <div class="progress-steps">
+                        <div class="step" id="step1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Vision Analysis</div>
+                        </div>
+                        <div class="step" id="step2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Literature Research</div>
+                        </div>
+                        <div class="step" id="step3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Report Generation</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section (hidden initially) -->
+            <section class="results-section hidden" id="resultsSection">
+                
+                <!-- Primary Diagnosis Card -->
+                <div class="result-card primary-diagnosis">
+                    <div class="card-header">
+                        <h3>Primary Diagnosis</h3>
+                        <span class="confidence-badge" id="confidenceBadge"></span>
+                    </div>
+                    <div class="diagnosis-name" id="diagnosisName"></div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                    <div class="review-flag hidden" id="reviewFlag">
+                        ⚠️ Human review recommended
+                    </div>
+                </div>
+
+                <!-- All Predictions Card -->
+                <div class="result-card">
+                    <h3>Differential Diagnoses</h3>
+                    <div class="predictions-list" id="predictionsList"></div>
+                </div>
+
+                <!-- Research Summary Card -->
+                <div class="result-card">
+                    <h3>📚 Research Summary</h3>
+                    <div class="research-content" id="researchContent"></div>
+                </div>
+
+                <!-- Final Report Card -->
+                <div class="result-card report-card">
+                    <div class="card-header">
+                        <h3>Complete Diagnostic Report</h3>
+                        <button class="btn btn-small" id="downloadBtn">
+                            💾 Download Report
+                        </button>
+                    </div>
+                    <pre class="report-content" id="reportContent"></pre>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="newAnalysisBtn">
+                        🔄 Analyze Another Image
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Section (hidden initially) -->
+            <section class="error-section hidden" id="errorSection">
+                <div class="error-card">
+                    <div class="error-icon">❌</div>
+                    <h3>Analysis Failed</h3>
+                    <p class="error-message" id="errorMessage"></p>
+                    <button class="btn btn-primary" id="retryBtn">
+                        Try Again
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <strong>Disclaimer:</strong> This is an AI-assisted diagnostic tool for educational and research purposes.
+                All findings must be validated by licensed healthcare professionals.
+                Do not make medical decisions based solely on these results.
+            </p>
+            <p class="footer-meta">
+                Built with FastAPI + LangGraph + Vanilla JavaScript | 
+                <a href="/api/docs" target="_blank">API Documentation</a>
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Load JavaScript last for better page load performance -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
