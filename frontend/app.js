@@ -11,13 +11,27 @@
  */
 
 // ============================================================================
+// API CONFIGURATION
+// ============================================================================
+
+// API Base URL is already defined in index.html inline script
+// Just verify it's available
+if (typeof API_BASE_URL === 'undefined') {
+    console.error('❌ API_BASE_URL not defined! Check index.html');
+}
+
+console.log('📱 Frontend JavaScript loaded');
+console.log('🌐 Using API:', API_BASE_URL);
+
+// ============================================================================
 // STATE MANAGEMENT
 // ============================================================================
 
 const AppState = {
     selectedFile: null,
     isProcessing: false,
-    currentStep: 0
+    currentStep: 0,
+    currentReport: null
 };
 
 // ============================================================================
@@ -118,7 +132,9 @@ function attachEventListeners() {
 
 async function checkServerHealth() {
     try {
-        const response = await fetch('/health');
+        console.log('🔍 Checking server health at:', `${API_BASE_URL}/health`);
+        
+        const response = await fetch(`${API_BASE_URL}/health`);
         const data = await response.json();
         
         if (data.status === 'healthy') {
@@ -130,6 +146,7 @@ async function checkServerHealth() {
     } catch (error) {
         updateStatus('Server Offline', 'error');
         console.error('❌ Health check failed:', error);
+        console.log('💡 Tip: Backend may be sleeping (Render free tier). Try uploading an image to wake it up.');
     }
 }
 
@@ -240,6 +257,9 @@ async function analyzeImage() {
     showSection('loading');
     updateStatus('Processing...', 'warning');
     
+    // Add cold start warning for Render free tier
+    elements.loadingMessage.textContent = '⏳ Waking up server... First request may take 30-60 seconds.';
+    
     // Simulate progress through steps
     simulateProgress();
     
@@ -248,19 +268,21 @@ async function analyzeImage() {
         const formData = new FormData();
         formData.append('image', AppState.selectedFile);
         
-        console.log('🔬 Sending image for analysis...');
+        console.log('🔬 Sending image for analysis to:', `${API_BASE_URL}/analyze`);
         
-        // Send POST request to backend
-        const response = await fetch('/analyze', {
+        // Send POST request to backend (FIXED: Using backticks for template literal)
+        const response = await fetch(`${API_BASE_URL}/analyze`, {
             method: 'POST',
             body: formData
         });
+        
+        console.log('📡 Response status:', response.status);
         
         // Parse JSON response
         const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(data.detail || 'Analysis failed');
+            throw new Error(data.detail || `Server error: ${response.status}`);
         }
         
         if (!data.success) {
@@ -276,7 +298,7 @@ async function analyzeImage() {
         
     } catch (error) {
         console.error('❌ Analysis error:', error);
-        showError(error.message);
+        showError(error.message || 'Failed to analyze image. Please try again.');
         updateStatus('Analysis Failed', 'error');
     } finally {
         AppState.isProcessing = false;
@@ -302,7 +324,7 @@ function simulateProgress() {
         } else {
             clearInterval(interval);
         }
-    }, 1500);
+    }, 2000); // Changed to 2 seconds to account for slower backend
 }
 
 // ============================================================================
@@ -433,6 +455,9 @@ function resetToUpload() {
     
     // Reset status
     updateStatus('System Ready', 'success');
+    
+    // Recheck server health
+    checkServerHealth();
 }
 
 // ============================================================================

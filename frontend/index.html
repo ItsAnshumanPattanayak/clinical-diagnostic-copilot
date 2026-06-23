@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinical Diagnostic Copilot</title>
     
-    <!-- Link to external stylesheet -->
-    <link rel="stylesheet" href="/static/style.css">
+    <!-- Changed: Remove /static/ prefix for Vercel -->
+    <link rel="stylesheet" href="style.css">
     
-    <!-- Preconnect to potential CDN sources for better performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     
-    <!-- Favicon (optional - create a simple medical icon) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
 </head>
 <body>
-    <!-- Main Container -->
     <div class="container">
         
-        <!-- Header Section -->
         <header class="header">
             <div class="header-content">
                 <h1 class="title">
@@ -30,17 +26,14 @@
                 </p>
             </div>
             
-            <!-- Status Indicator -->
             <div class="status-badge" id="statusBadge">
                 <span class="status-dot"></span>
                 <span id="statusText">System Ready</span>
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main class="main-content">
             
-            <!-- Upload Section -->
             <section class="upload-section" id="uploadSection">
                 <div class="upload-card">
                     <div class="upload-icon">📁</div>
@@ -49,7 +42,6 @@
                         Supported formats: JPG, PNG, BMP, TIFF (Max 10MB)
                     </p>
                     
-                    <!-- File Input (hidden) -->
                     <input 
                         type="file" 
                         id="imageInput" 
@@ -57,19 +49,16 @@
                         style="display: none;"
                     >
                     
-                    <!-- Upload Button -->
                     <button class="btn btn-primary" id="uploadBtn">
                         Select Image
                     </button>
                     
-                    <!-- Or use drag & drop -->
                     <div class="drop-zone" id="dropZone">
                         <p>Or drag and drop an image here</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Image Preview Section (hidden initially) -->
             <section class="preview-section hidden" id="previewSection">
                 <div class="preview-card">
                     <h3>Image Preview</h3>
@@ -91,7 +80,6 @@
                 </div>
             </section>
 
-            <!-- Loading Indicator (hidden initially) -->
             <section class="loading-section hidden" id="loadingSection">
                 <div class="loading-card">
                     <div class="spinner"></div>
@@ -114,10 +102,8 @@
                 </div>
             </section>
 
-            <!-- Results Section (hidden initially) -->
             <section class="results-section hidden" id="resultsSection">
                 
-                <!-- Primary Diagnosis Card -->
                 <div class="result-card primary-diagnosis">
                     <div class="card-header">
                         <h3>Primary Diagnosis</h3>
@@ -132,19 +118,16 @@
                     </div>
                 </div>
 
-                <!-- All Predictions Card -->
                 <div class="result-card">
                     <h3>Differential Diagnoses</h3>
                     <div class="predictions-list" id="predictionsList"></div>
                 </div>
 
-                <!-- Research Summary Card -->
                 <div class="result-card">
                     <h3>📚 Research Summary</h3>
                     <div class="research-content" id="researchContent"></div>
                 </div>
 
-                <!-- Final Report Card -->
                 <div class="result-card report-card">
                     <div class="card-header">
                         <h3>Complete Diagnostic Report</h3>
@@ -155,7 +138,6 @@
                     <pre class="report-content" id="reportContent"></pre>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="action-buttons">
                     <button class="btn btn-primary" id="newAnalysisBtn">
                         🔄 Analyze Another Image
@@ -163,7 +145,6 @@
                 </div>
             </section>
 
-            <!-- Error Section (hidden initially) -->
             <section class="error-section hidden" id="errorSection">
                 <div class="error-card">
                     <div class="error-icon">❌</div>
@@ -177,7 +158,6 @@
 
         </main>
 
-        <!-- Footer -->
         <footer class="footer">
             <p>
                 <strong>Disclaimer:</strong> This is an AI-assisted diagnostic tool for educational and research purposes.
@@ -185,14 +165,25 @@
                 Do not make medical decisions based solely on these results.
             </p>
             <p class="footer-meta">
-                Built with FastAPI + LangGraph + Vanilla JavaScript | 
-                <a href="/api/docs" target="_blank">API Documentation</a>
+                Built with FastAPI + Vanilla JavaScript | 
+                <!-- Fixed: Point to backend API docs -->
+                <a href="https://clinical-copilot-api-i7wn.onrender.com/api/docs" target="_blank">API Documentation</a>
             </p>
         </footer>
 
     </div>
 
-    <!-- Load JavaScript last for better page load performance -->
-    <script src="/static/app.js"></script>
+    <!-- API Configuration -->
+    <script>
+        // Inline config for immediate availability
+        const API_BASE_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:8000'
+            : 'https://clinical-copilot-api-i7wn.onrender.com';
+            
+        console.log('🌐 API Base URL initialized:', API_BASE_URL);
+    </script>
+    
+    <!-- Changed: Remove /static/ prefix for Vercel -->
+    <script src="app.js"></script>
 </body>
 </html>
