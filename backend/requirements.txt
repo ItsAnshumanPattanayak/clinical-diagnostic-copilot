@@ -1,44 +1,19 @@
 # Web Framework
-fastapi>=0.110.0
-uvicorn[standard]>=0.24.0
-python-multipart>=0.0.6
-
-# AI/ML Orchestration
-langgraph==0.2.27
-langchain==0.3.1
-langchain-openai==0.2.1
-langchain-core==0.3.8
-langchain-text-splitters==0.3.0
-
-# Data Validation (Updated to resolve conflict)
-pydantic>=2.7.4,<3.0.0
-pydantic-settings>=2.2.0
-
-# Deep Learning
-torch==2.2.0
-torchvision==0.17.0
-
-# Utilities
-pillow>=10.1.0
-numpy>=1.26.2
-python-dotenv>=1.0.0
-httpx>=0.25.2
-
-# Web Framework
 fastapi==0.104.1
-uvicorn[standard]==0.24.0
+uvicorn==0.24.0
 python-multipart==0.0.6
 
-# AI/ML Orchestration
+# Core AI framework - minimal installation
 langgraph==0.2.27
 langchain-core==0.3.8
 
-# Utilities
-pillow>=10.0.0
-numpy>=1.26.0
-python-dotenv>=1.0.0
-pydantic>=2.5.0
-pydantic-settings>=2.0.0
+# Data & Image Processing
+pillow==10.1.0
+numpy==1.26.4
+pydantic==2.5.3
+python-dotenv==1.0.0
 
-# Production server
-gunicorn==21.2.0
+# Additional required dependencies
+typing-extensions==4.8.0
+httpx==0.25.2
+anyio==3.7.1
