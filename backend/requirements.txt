@@ -1,23 +1,25 @@
 # Web Framework
-fastapi==0.104.1
-uvicorn[standard]
-python-multipart==0.0.6
+fastapi>=0.110.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
 
 # AI/ML Orchestration
-langgraph
-langchain
-langchain-openai
-langchain-core
+langgraph==0.2.27
+langchain==0.3.1
+langchain-openai==0.2.1
+langchain-core==0.3.8
+langchain-text-splitters==0.3.0
 
-# Data Validation
-pydantic==2.5.0
-pydantic-settings==2.1.0
+# Data Validation (Updated to resolve conflict)
+pydantic>=2.7.4,<3.0.0
+pydantic-settings>=2.2.0
 
-# Deep Learning (CPU-only for lightweight deployment)
-torch
-torchvision
+# Deep Learning
+torch==2.2.0
+torchvision==0.17.0
 
 # Utilities
-pillow
-numpy
-python-dotenv==1.0.0
+pillow>=10.1.0
+numpy>=1.26.2
+python-dotenv>=1.0.0
+httpx>=0.25.2
